@@ -9,6 +9,20 @@
     "lint": "next lint",
     "format": "prettier 'src/**/*.{js,ts,jsx,tsx}' --write"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@fortawesome/fontawesome-common-types",
+      "@fortawesome/fontawesome-svg-core",
+      "@fortawesome/free-brands-svg-icons",
+      "@fortawesome/free-regular-svg-icons",
+      "@fortawesome/free-solid-svg-icons",
+      "core-js",
+      "es5-ext",
+      "esbuild",
+      "sharp",
+      "workerd"
+    ]
+  },
   "dependencies": {
     "@cloudflare/workers-types": "^4.20250408.0",
     "@fortawesome/fontawesome-svg-core": "^6.2.1",
