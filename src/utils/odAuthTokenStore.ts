@@ -1,10 +1,13 @@
-import { KVNamespace } from '@cloudflare/workers-types'
+import { Redis } from '@upstash/redis'
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL || '',
+  token: process.env.UPSTASH_REDIS_REST_TOKEN || '',
+})
 
 export async function getOdAuthTokens(): Promise<{ accessToken: unknown; refreshToken: unknown }> {
-  const { ONEDRIVE_CF_INDEX_KV } = process.env as unknown as { ONEDRIVE_CF_INDEX_KV: KVNamespace }
-
-  const accessToken = await ONEDRIVE_CF_INDEX_KV.get('access_token')
-  const refreshToken = await ONEDRIVE_CF_INDEX_KV.get('refresh_token')
+  const accessToken = await redis.get('access_token')
+  const refreshToken = await redis.get('refresh_token')
 
   return {
     accessToken,
@@ -21,8 +24,6 @@ export async function storeOdAuthTokens({
   accessTokenExpiry: number
   refreshToken: string
 }): Promise<void> {
-  const { ONEDRIVE_CF_INDEX_KV } = process.env as unknown as { ONEDRIVE_CF_INDEX_KV: KVNamespace }
-
-  await ONEDRIVE_CF_INDEX_KV.put('access_token', accessToken, { expirationTtl: accessTokenExpiry })
-  await ONEDRIVE_CF_INDEX_KV.put('refresh_token', refreshToken)
+  await redis.set('access_token', accessToken, { ex: accessTokenExpiry })
+  await redis.set('refresh_token', refreshToken)
 }
