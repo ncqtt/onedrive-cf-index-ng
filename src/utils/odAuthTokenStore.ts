@@ -1,11 +1,12 @@
-import { Redis } from '@upstash/redis'
+import Redis from 'ioredis'
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL || '',
-  token: process.env.UPSTASH_REDIS_REST_TOKEN || '',
-})
+const redis = process.env.REDIS_URL ? new Redis(process.env.REDIS_URL) : undefined
 
 export async function getOdAuthTokens(): Promise<{ accessToken: unknown; refreshToken: unknown }> {
+  if (!redis) {
+    throw new Error('REDIS_URL is not defined in environment variables')
+  }
+
   const accessToken = await redis.get('access_token')
   const refreshToken = await redis.get('refresh_token')
 
@@ -24,6 +25,10 @@ export async function storeOdAuthTokens({
   accessTokenExpiry: number
   refreshToken: string
 }): Promise<void> {
-  await redis.set('access_token', accessToken, { ex: accessTokenExpiry })
+  if (!redis) {
+    throw new Error('REDIS_URL is not defined in environment variables')
+  }
+
+  await redis.set('access_token', accessToken, 'EX', accessTokenExpiry)
   await redis.set('refresh_token', refreshToken)
 }
